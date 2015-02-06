@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Main</h2>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<canvas id="myCanvas" width="200" height="100" style="border:1px solid #000000;"></canvas>
+{% endblock %}
