@@ -1,8 +1,8 @@
 from ESCGProject import app
 from flask import Flask, render_template, request, redirect, url_for, flash
 from ESCGProject.forms import RegistrationForm
+from ESCGProject.database import init_db
 
-from DBConnection import UseDatabase
 
 @app.route('/')
 def hello_world():
@@ -33,3 +33,10 @@ def register():
 	return render_template('register.html', form=form)
        # user = User(form.username.data, form.email.data,
         #            form.password.data)
+
+@app.route('/buyCard', methods=['GET', 'POST'])
+def buyCard():
+	db = init_db()
+	if User.query.all() < 20:
+		for i < 120:
+			

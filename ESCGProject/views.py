@@ -1,8 +1,14 @@
+import logging
+
 from ESCGProject import app
 from flask import Flask, render_template, request, redirect, url_for, flash
 from ESCGProject.forms import RegistrationForm
 
-#from DBConnection import UseDatabase
+from ESCGProject.database import db_session, init_db
+from ESCGProject.models import Card
+
+
+
 
 @app.route('/')
 def hello_world():
@@ -33,3 +39,21 @@ def register():
 	return render_template('register.html', form=form)
        # user = User(form.username.data, form.email.data,
         #            form.password.data)
+
+@app.route('/buyCard', methods=['GET', 'POST'])
+def buyCard():
+	init_db()
+	if len(Card.query.all()) < 20:
+		i = 0		
+		while i < 120:
+#			obj = db_session.query(Card).order_by(Card.number.desc()).first()
+			obj = Card.query.order_by(Card.number.desc()).first()
+			logging.debug(obj)
+			if obj is None:
+				obj = i
+			eachCard = Card(obj, None)
+			print(obj)
+			db_session.add(eachCard)
+			db_session.commit()
+			i+=1
+	return "Hello World!"	

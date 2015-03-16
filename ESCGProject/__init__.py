@@ -1,10 +1,10 @@
 from flask import Flask
-from flaskext.mysql import MySQL
 
 app = Flask(__name__)
 
 import ESCGProject.views
-import ESCGProject.DBConnection
+from ESCGProject.database import db_session
 
-#if __name__ == '__main__':
-#    app.run(host='127.0.0.1', port=12344, debug = True, ssl_context=context)
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()

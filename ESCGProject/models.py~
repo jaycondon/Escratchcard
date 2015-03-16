@@ -1,0 +1,71 @@
+from sqlalchemy import Table, Column, Integer, String
+from sqlalchemy.orm import mapper
+from ESCGProject.database import metadata, db_session
+
+class User(object):
+    query = db_session.query_property()
+
+    def __init__(self, name=None, email=None):
+        self.name = name
+        self.email = email
+
+    def __repr__(self):
+        return '<User %r>' % (self.name)
+
+class User_Card(object):
+    query = db_session.query_property()
+
+    def __init__(self, User_ID, Card_ID):
+        self.User_ID = User_ID
+        self.Card_ID = Card_ID
+
+    def __repr__(self):
+        return '<Card %r>' % (self.name)
+
+class Card(object):
+    query = db_session.query_property()
+
+    def __init__(self, number=None, detail=None):
+        self.number = number
+        self.detail = detail
+
+    def __repr__(self):
+        return '<Card %r>' % (self.name)
+
+class Card_Detail(object):
+    query = db_session.query_property()
+
+    def __init__(self, detail=None):
+        self.detail = detail
+
+    def __repr__(self):
+        return '<Card %r>' % (self.name)
+
+users = Table('users', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(50), unique=True),
+    Column('email', String(120), unique=True),
+	Column('password', String(120), unique=False)
+)
+
+users_cards = Table('users_cards', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('user_id', String(50), unique=True),
+    Column('card_id', String(120), unique=True),
+)
+
+cards = Table('cards', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('number', String(50), unique=True),
+    Column('detail', String(120), unique=True),
+)
+
+card_details = Table('card_details', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('value', String(50), unique=True),
+)
+
+mapper(User, users)
+mapper(User_Card, users_cards)
+mapper(Card, cards)
+mapper(Card_Detail, card_details)
