@@ -1,10 +1,12 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
+from ESCGProject.models import Base
 
-engine = create_engine('mysql+pymysql://root:itcarlow@localhost/ESCGdb', convert_unicode=True)
-metadata = MetaData()
+engine = create_engine('mysql+pymysql://root:itcarlow@localhost/ESCGdb', convert_unicode=True, echo=True)
+#metadata = MetaData()
+#Base.metadata.create_all(engine)
 db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
+                                         autoflush=True,
                                          bind=engine))
 def init_db():
-    metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
