@@ -11,6 +11,7 @@
 		{% endif %}
 		<a href="">My Account</a>
 		<a href={{ url_for('details') }}>Update Details</a>
+		<a href={{ url_for('DepositMoney') }}>Deposit Money</a>
 	</div>
 	{% for message in get_flashed_messages() %}
 	<div class=flash>{{ message }}</div>

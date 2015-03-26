@@ -1,94 +1,3 @@
-# from sqlalchemy import Table, Column, Integer, String, ForeignKey
-# from sqlalchemy.orm import mapper, relationship, backref
-# from ESCGProject.database import metadata, db_session
-# from sqlalchemy.ext.declarative import declarative_base
-
-
-
-# class User(object):
-#     __tablename__ = 'user'
-#     query = db_session.query_property()
-
-#     def __init__(self, name=None, email=None, password=None, users_cards_id=None):
-#         self.name = name
-#         self.email = email
-#         self.password = password
-#         self.users_cards_id = users_cards_id
-
-#     def __repr__(self):
-#         return '<User %r>' % (self.name)
-
-# class User_Card(object):
-#     __tablename__ = 'users_cards'
-#     query = db_session.query_property()
-
-#     def __init__(self, User_ID=None, Card_ID=None):
-#         self.User_ID = User_ID
-#         self.Card_ID = Card_ID
-
-#     def __repr__(self):
-#         return '<Card %r>' % (self.User_ID)
-
-# class Card(object):
-#     __tablename__ = 'cards'
-#     query = db_session.query_property()
-
-#     def __init__(self, number, detail=None):
-#         self.number = number
-#         self.detail = detail
-
-#     def __repr__(self):
-#         return '<Card %r>' % (self.number)
-
-# class Card_Detail(object):
-#     __tablename__ = 'card_details'
-#     query = db_session.query_property()
-
-#     def __init__(self, detail=None):
-#         self.detail = detail
-
-#     def __repr__(self):
-#         return '<Card %r>' % (self.detail)
-
-# users = Table('users', metadata,
-#     Column('id', Integer, primary_key=True),
-#     Column('name', String(50), unique=True),
-#     Column('email', String(120), unique=True),
-# 	Column('password', String(120), unique=False),
-# #    children = relationship("Card"),
-#     users_cards_id = relationship('Card', backref='users',
-#                                 lazy='dynamic')
-# )
-
-# users_cards = Table('users_cards', metadata,
-#     Column('id', Integer, primary_key=True),
-#     Column('user_id', Integer, unique=True),
-#     Column('card_id', Integer, unique=True),
-# )
-
-# cards = Table('cards', metadata,
-#     Column('id', Integer, primary_key=True),
-#     Column('number', Integer, unique=False),
-#     Column('detail', Integer, unique=True),
-#     Column('users_id', Integer, ForeignKey('users.id')),
-#     cards_value = relationship('Card_Detail', backref='cards',
-#                             lazy='dynamic')
-#  #   parent_id = Column(Integer, ForeignKey('users.id')),
-# #    child = relationship("Child", uselist=False, backref="parent")
-# )
-
-# card_details = Table('card_details', metadata,
-#     Column('id', Integer, primary_key=True),
-#     Column('value', Integer, unique=True),
-#     cards_id = Column(Integer, ForeignKey('cards.id')),
-# #    parent_id = Column(Integer, ForeignKey('parent.id'))
-# )
-
-# mapper(User, users)
-# mapper(User_Card, users_cards)
-# mapper(Card, cards)
-# mapper(Card_Detail, card_details)
-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey
 
@@ -106,7 +15,16 @@ class User(Base):
     balance = Column(Integer)
 
     users_cards = relationship("Card")
+    credit_cards = relationship("CreditCard")
 #insert into user (id,name,email,password,balance) Values (120, 'Johnny', 'johnnycndn@yahoo.ie', 'password', 0);
+
+class CreditCard(Base):
+    __tablename__ = 'credit_card'
+
+    id = Column(Integer, primary_key=True)
+    usersCC = relationship("User")
+    user_id = Column(ForeignKey('user.id'))
+
 
 class Card(Base):
     __tablename__ = 'card'

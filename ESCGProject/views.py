@@ -2,11 +2,13 @@ import logging
 
 from ESCGProject import app
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from ESCGProject.forms import RegistrationForm, LoginForm
+from ESCGProject.forms import RegistrationForm, LoginForm, PaymentForm
 from ESCGProject.utils import RetrieveCard
 
 from ESCGProject.database import db_session
 from ESCGProject.models import *
+
+from ESCGProject.paypal import MakeAPayment, StoreACard
 
 from sqlalchemy.exc import StatementError, SQLAlchemyError
 
@@ -15,35 +17,7 @@ import os
 
 
 balance = 0
-#from ESCGProject.database import db_session, init_db
-#from ESCGProject.models import Card, Card_Detail, User
 
-#import random
-
-#TOP_PRIZE = 20
-#SECOND_PRIZE = 10
-#THIRD_PRIZE = 5
-#FOURTH_PRIZE = 2
-#FIFTH_PRIZE = 1
-
-#TOP_CHANCE = 1
-#SECOND_CHANCE = 2
-#THIRD_CHANCE = 4
-#FOURTH_CHANCE = 6
-#FIFTH_CHANCE = 7
-
-#CREATE_CARD = 120
-#MIN_CARD = 20
-
-#@app.route('/')
-#def hello_world():
-#	return redirect(url_for('login'))
-#    return 'Hello World!'
-
-#@app.route('/details')
-#def details():
-#	form = RegistrationForm(request.form)
-#	return render_template('details.html', form=form)
 @app.route('/', methods=['GET', 'POST'])
 def unused():
 	return redirect(url_for('main'))
@@ -71,13 +45,10 @@ def login():
 @app.route('/main', methods=['GET', 'POST'])
 def main():
 	if 'username' in session:
+		current_user = db_session.query(User).filter(User.name==session['username']).first()
 		url_for('static', filename='style.css',image='static/thewinner.jpg')
-		return render_template('main.html')
+		return render_template('main.html',balance=current_user.balance)
 	return redirect(url_for('login'))
-#	get_a_card = db_session.query(Card.id, Card_Detail.value).join(Card_Detail, Card.id==Card_Detail.card_id).filter(Card.user_id==None)
-#	rand_card = random.randrange(0, get_a_card.count(), 1)
-#	print(get_a_card[rand_card].value)
-#	print(get_a_card[rand_card].id)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -94,25 +65,13 @@ def register():
 		flash('Thanks for registering')
 		return redirect(url_for('login'))
 	return render_template('register.html', form=form)
-       # user = User(form.username.data, form.email.data,
-        #            form.password.data)
 
-#def FillCards(chance,prize):
-#	if chance == 0:
-#		return
-#	else:
-#		available = db_session.query(Card_Detail).join(Card, Card_Detail.card_id==Card.id).filter(Card_Detail.value==0).filter(Card.user_id==None)
-#		rand_number = random.randrange(0, available.count(), 1)
-#		available[rand_number].value = prize
-#		chance-=1
-#		db_session.commit()
-#		FillCards(chance, prize)
 
 @app.route('/buyCard', methods=['GET', 'POST'])
 def buyCard():
 	if 'username' in session:
 		a_card = RetrieveCard()
-		current_user = db_session.query(User).filter(User.id==120).first()
+		current_user = db_session.query(User).filter(User.name==session['username']).first()
 		put_user = db_session.query(Card).filter(Card.id==a_card.id).first()
 		put_user.user_id=current_user.id
 		db_session.commit()
@@ -125,6 +84,31 @@ def buyCard():
 		return render_template('main.html',amount=amount,balance=current_user.balance)
 	else:
 		return redirect(url_for('login'))
+
+@app.route('/Deposit', methods=['GET', 'POST'])
+def DepositMoney():
+	if 'username' in session:
+		form = PaymentForm(request.form)
+		if request.method == 'POST':
+			print("INSIDE POST")
+			current_user = db_session.query(User).filter(User.name==session['username']).first()
+			topUp = MakeAPayment(form.card_type.data,form.number.data,form.month.data,form.year.data,form.cvv2.data,form.firstname.data,form.lastname.data,form.totalAmount.data)
+			if topUp is None:
+				topUp = 0
+			current_user.balance = current_user.balance + topUp
+			db_session.commit()
+			return redirect(url_for('main'))
+		return render_template('addcard.html',form=form)
+
+@app.route('/AddCard', methods=['GET', 'POST'])
+def AddCard():
+	if 'username' in session:
+		form = AddCardForm(request.form)
+		if request.method == 'POST':
+			current_user = db_session.query(User).filter(User.name==session['username']).first()
+			StoreACard(form.card_type.data,form.number.data,form.month.data,form.year.data,form.cvv2.data,form.firstname.data,form.lastname.data,current_user.id)	
+		return render_template('addcard.html',form=form)
+	return redirect(url_for('login'))
 
 @app.route('/*', methods=['GET', 'POST'])
 def WrongUrl():
