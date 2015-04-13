@@ -1,46 +1,72 @@
 {% extends "layout.html" %}
 {% block body %}
-<!--<link rel=stylesheet type="text/javascript" href="{{url_for('static', filename='scratch.js')}}">-->
-<script type=text/javascript src="{{url_for('static', filename='scratch.js') }}"></script>
-<!--<script>
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-ctx.fillStyle = "#FF0000";
-ctx.fillRect(0,0,150,75);
-</script>
--->
-<script>
-window.onload() function () {
-    var canvas = document.getElementById("myCanvas");
-    var ctx = canvas.getContext("2d");
-    var img = {{image}};
-    ctx.drawImage(img, 10, 10);
-}
-</script>
-
-<!--<script>
-function myFunction() {
-  var canvas = document.getElementById('myCanvas');
-  var context = canvas.getContext('2d');
-  var imageObj = new Image();
-
-  imageObj.onload = function() {
-    context.drawImage(imageObj, 320, 240);
-  };
-  imageObj.src = '/static/thewinner.jpg';
- }
-</script>-->
 <h2>Main</h2>
 {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-
-<p id="demo">A Paragraph</p>
-Account Balance:<input type="text" name="balance" value="{{ balance }}" readonly><br>
-Prize:<input type="text" name="CardValue" value="{{ amount }}" readonly><br>
-<canvas id="myCanvas" width="320px" height="240px" style="border:1px solid #000000;"></canvas>
+<table>
+<tr><td>Account Balance:</td><td><input type="text" name="balance" value="{{ balance }}" id="balance" readonly></td></tr>
+<tr><td>Possible Prize:</td><td><input type="text" name="CardValue" value="{{ amount }}" readonly></td></tr>
+</table>
+<canvas id="myCanvas"></canvas> 
 <form action="/buyCard">
 <input type="submit" value="Buy Card">
-<button type="button" onclick="myFunction()">Try it</button>
-</form> 
+<button type="button" onclick="draw_graphics(true);checkwin({{card_id}})">Scratch Off</button>
+</form>
+<!--  <ul>
+	http://stackoverflow.com/questions/13071275/flask-jinja-macros-variable-in-url-for
+	<li>list</li>
+	{% for image in imagelist %}
+	<li id="eachimage">{{ url_for('static', filename = 'images/%s' % image)}}
+	<img src="{{ url_for('static', filename='images/%s' % image) }}" alt="{{image}}" >
+	{% endfor %}
+</ul>  -->
 
+<script type="text/javascript">
+window.onload = function() {
+  draw_graphics(false);
+  document.getElementById("demo").innerHTML =  "{{card_id}}";
+};
 
+function checkwin(card) 
+{
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() 
+	{
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) 
+		{
+			document.getElementById("balance").value = xmlhttp.responseText;
+		}
+	}
+	xmlhttp.open("POST", "{{ url_for('CheckWinServer') }}", true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("card_id={{card_id}}");
+};
+function draw_graphics(checkCard)
+{
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	var overlay_img = new Image();
+
+	// http://www.html5rocks.com/en/tutorials/canvas/integrating/
+
+	var XPos = 0
+	var YPos = 0
+	{% for image in imagelist %}
+		var img = new Image();
+		img.src = "{{ url_for('static', filename='images/%s' % image) }}"
+		if(XPos>c.width*.66) {
+			XPos = 0
+			YPos = YPos + c.height * .5
+		}
+		ctx.drawImage(img,XPos,YPos, c.width * .33, c.height * .5);
+		XPos = XPos + c.width * .33
+	{% endfor %}
+
+	if(checkCard==true){
+		ctx.globalCompositeOperation="destination-over";
+	}
+		//	Gets overlay image
+	overlay_img.src = "{{ url_for('static', filename = 'overlay.jpg' )}}"
+	ctx.drawImage(overlay_img,0,0,c.width,c.height);
+}
+</script>
 {% endblock %}

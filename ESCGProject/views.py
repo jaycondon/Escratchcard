@@ -1,22 +1,25 @@
 import logging
 
-from ESCGProject import app
+from ESCGProject import app, database, paypal
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from ESCGProject.forms import RegistrationForm, LoginForm, PaymentForm
-from ESCGProject.utils import RetrieveCard
+from ESCGProject.forms import RegistrationForm, LoginForm, PaymentForm, WithdrawForm
+from ESCGProject.utils import getImages
 
-from ESCGProject.database import db_session
+from ESCGProject.database import db_session, CheckUser, GetUser
 from ESCGProject.models import *
 
-from ESCGProject.paypal import MakeAPayment, StoreACard
+from ESCGProject.paypal import MakeAPayment, PayOut
 
 from sqlalchemy.exc import StatementError, SQLAlchemyError
 
 import random
 import os
 
-
-balance = 0
+@app.route('/CheckWinServer', methods=['GET', 'POST'])
+def CheckWinServer():
+	current_user = database.CheckCard(request.form['card_id'],session['username'])
+	balance = current_user.balance
+	return str(balance)
 
 @app.route('/', methods=['GET', 'POST'])
 def unused():
@@ -33,7 +36,7 @@ def details():
 def login():
 	form = LoginForm(request.form)
 	if request.method =='POST':
-		user = db_session.query(User).filter(User.name==form.username.data).filter(User.password==form.password.data).first()
+		user = database.CheckUser(form.username.data,form.password.data)
 		if not user:
 			flash('User name or password incorrect')
 			return redirect(url_for('login'))
@@ -42,12 +45,19 @@ def login():
 			return redirect(url_for('main'))
 	return render_template('login.html')
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():	
+	print("logout")
+	session.pop('username', None)
+	return render_template('login.html')
+
 @app.route('/main', methods=['GET', 'POST'])
 def main():
 	if 'username' in session:
-		current_user = db_session.query(User).filter(User.name==session['username']).first()
-		url_for('static', filename='style.css',image='static/thewinner.jpg')
-		return render_template('main.html',balance=current_user.balance)
+		current_user = database.GetUser(session['username'])
+		overlay_img=url_for('static', filename='overlay.jpg')
+		return render_template('main.html',balance=current_user.balance,overlay_img=overlay_img)
+#		return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg")
 	return redirect(url_for('login'))
 
 
@@ -55,50 +65,74 @@ def main():
 def register():
 	form = RegistrationForm(request.form)
 	if request.method == 'POST' and form.validate():
-		user = User()
-		user.name = form.username.data
-		user.email = form.email.data
-		user.password = form.password.data
-		user.balance = 0
-		db_session.add(user)
-		db_session.commit()
-		flash('Thanks for registering')
-		return redirect(url_for('login'))
+		user = database.GetUser(form.username.data)
+		if user is None:
+			database.AddUser(form.username.data,form.email.data,form.password.data)
+			flash('Thanks for registering')
+			return redirect(url_for('login'))
+		flash('Username already exists')
+		return render_template('register.html', form=form)
 	return render_template('register.html', form=form)
 
 
 @app.route('/buyCard', methods=['GET', 'POST'])
 def buyCard():
 	if 'username' in session:
-		a_card = RetrieveCard()
-		current_user = db_session.query(User).filter(User.name==session['username']).first()
-		put_user = db_session.query(Card).filter(Card.id==a_card.id).first()
-		put_user.user_id=current_user.id
-		db_session.commit()
-		if a_card.value == 0:
-			amount = random.choice([1,2,5,10,20])
+		current_user = database.GetUser(session['username'])
+		if current_user.balance < 1:
+			return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg",error="You do not have enough funds")
 		else:
-			current_user.balance = current_user.balance + a_card.value
-			db_session.commit()
-			amount = a_card.value
-		return render_template('main.html',amount=amount,balance=current_user.balance)
-	else:
-		return redirect(url_for('login'))
+			current_user.balance = current_user.balance - 1
+			a_card = database.RetrieveCard()
+			current_user = database.GetUser(session['username'])
+			database.AddCardToUser(a_card.id,current_user.id)
+			if a_card.value == 0:
+				amount = random.choice([1,2,5,10,20])
+				image_list = getImages(False,6)
+			else:
+#				current_user.balance = current_user.balance + a_card.value
+				db_session.commit()
+				image_list = getImages(True,6)
+				amount = a_card.value
+			return render_template('main.html',amount=amount,balance=current_user.balance,imagelist=image_list,card_id=a_card.id)
+	return redirect(url_for('login'))
 
 @app.route('/Deposit', methods=['GET', 'POST'])
 def DepositMoney():
 	if 'username' in session:
 		form = PaymentForm(request.form)
 		if request.method == 'POST':
-			print("INSIDE POST")
-			current_user = db_session.query(User).filter(User.name==session['username']).first()
-			topUp = MakeAPayment(form.card_type.data,form.number.data,form.month.data,form.year.data,form.cvv2.data,form.firstname.data,form.lastname.data,form.totalAmount.data)
-			if topUp is None:
-				topUp = 0
-			current_user.balance = current_user.balance + topUp
-			db_session.commit()
-			return redirect(url_for('main'))
-		return render_template('addcard.html',form=form)
+			current_user = database.GetUser(session['username'])
+			payment_result = paypal.MakeAPayment(form.card_type.data,form.number.data,form.month.data,form.year.data,form.cvv2.data,form.firstname.data,form.lastname.data,form.totalAmount.data)
+			if payment_result == True:
+				topUp = form.totalAmount.data
+				current_user.balance = current_user.balance + topUp
+				db_session.commit()
+				return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg")
+			else:
+				return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg",error="Payment unsuccessful")
+		return render_template('deposit.html',form=form)
+	return redirect(url_for('login'))
+
+@app.route('/withdraw', methods=['GET', 'POST'])
+def withdraw():
+	if 'username' in session:
+		form = WithdrawForm(request.form)
+		current_user = database.GetUser(session['username'])
+		if request.method == 'POST':
+			if int(form.totalAmount.data) > current_user.balance:
+				return render_template('withdraw.html',balance=current_user.balance,form=form,error="You have insufficient funds")
+			print(session['username'])
+			print(current_user.email)
+			payout_result = PayOut(current_user.email,form.totalAmount.data)
+			print(payout_result)
+			if payout_result == "SUCCESS":
+				current_user.balance = current_user.balance - int(form.totalAmount.data)
+				db_session.commit()
+			else:
+				return render_template('withdraw.html',balance=current_user.balance,form=form,error="There has been a problem in the payout process")
+		return render_template('withdraw.html',balance=current_user.balance,form=form)
+	return redirect(url_for('main'))
 
 @app.route('/AddCard', methods=['GET', 'POST'])
 def AddCard():
@@ -113,3 +147,9 @@ def AddCard():
 @app.route('/*', methods=['GET', 'POST'])
 def WrongUrl():
 	return redirect(url_for('main'))
+
+@app.route('/info', methods=['GET', 'POST'])
+def info():
+	if 'username' in session:
+		return render_template('info.html')
+	return redirect(url_for('login'))

@@ -1,14 +1,27 @@
-{% extends "layout.html" %}
-{% block body %}
-<h2>Login</h2>
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-<form action="{{ url_for('login') }}" method=post>
-<dl>
-  <dt>Username:
-  <dd><input type=text name=username>
-  <dt>Password:
-  <dd><input type=password name=password>
-  <dd><input type=submit value=Login>
-</dl>
+<!doctype html>
+<title>Electronic Scratch Card Game</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+	<h1>Electronic Scratch Card Game</h1>
+	<h2>Login</h2>
+	{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+	<form action="{{ url_for('login') }}" method=post>
+	<dl>
+	  <dt>Username:
+	  <dd><input type=text name=username>
+	  <dt>Password:
+	  <dd><input type=password name=password>
+<table>
+<tr><td><dd><input type=submit value=Login></td>
+	</form>
+	<form action= '{{ url_for('register') }}' method=get>
+	<td><dd><input type="submit" value="Sign Up" ></td></tr>
+</table>
 </form>
-{% endblock %}
+	</dl>
+</div>
+{% for message in get_flashed_messages() %}
+	<div class=flash>{{ message }}</div>
+		{% endfor %}
+		{% block body %}{% endblock %}
+	</div>

@@ -1,5 +1,6 @@
 import paypalrestsdk
 import logging
+from paypalrestsdk import Payout, ResourceNotFound, Payment
 
 import os
 
@@ -7,36 +8,113 @@ import os
 # Paypal-Debug-Id if requesting PayPal Merchant Technical Services for support
 logging.basicConfig(level=logging.INFO)
 
-PAYPAL_MODE = os.environ.get("PAYPAL_MODE", None)
-PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID",None)
-PAYPAL_CLIENT_SECRET = os.environ.get("PAYPAL_CLIENT_SECRET",None)
+#PAYPAL_MODE = os.environ.get("PAYPAL_MODE", None)
+#PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID",None)
+#PAYPAL_CLIENT_SECRET = os.environ.get("PAYPAL_CLIENT_SECRET",None)
 
 def MakeAPayment(cardType,cardNo,month,year,cvv2,first,last,totalAmount):
-  payment = paypalrestsdk.Payment({
-    "intent": "sale",
-    "payer": {
-      "payment_method": "credit_card",
-      "funding_instruments": [{
-        "credit_card": {
-          "type": cardType,
-          "number": cardNo,
-          "expire_month": month,
-          "expire_year": year,
-          "cvv2": cvv2,
-          "first_name": first,
-          "last_name": last }}]},
-    "transactions": [{
-      "amount": {
-        "total": totalAmount,
-        "currency": "EUR" },
-      "description": "This is the payment transaction description." }]})
 
-  if payment.create():
-    print("Payment created successfully")
-    return totalAmount
-  else:
-    print(payment.error)
-    pass
+	PAYPAL_MODE = os.environ.get("PAYPAL_MODE", None)
+	PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID",None)
+	PAYPAL_CLIENT_SECRET = os.environ.get("PAYPAL_CLIENT_SECRET",None)
+
+	paypalrestsdk.configure({
+	"mode": PAYPAL_MODE, # sandbox or live
+	"client_id": PAYPAL_CLIENT_ID,
+	"client_secret": PAYPAL_CLIENT_SECRET })
+
+	payment = Payment({
+	  "intent": "sale",
+	  "payer": {
+		"payment_method": "credit_card",
+		"funding_instruments": [{
+		  "credit_card": {
+		    "type": "visa",
+		    "number": "4417119669820331",
+		    "expire_month": "11",
+		    "expire_year": "2018",
+		    "cvv2": "874",
+		    "first_name": "Joe",
+		    "last_name": "Shopper",
+		    "billing_address": {
+		      "line1": "52 N Main ST",
+		      "city": "Johnstown",
+		      "state": "OH",
+		      "postal_code": "43210",
+		      "country_code": "US" }}}]},
+	  "transactions": [{
+		"amount": {
+		  "total": "7.47",
+		  "currency": "USD",
+		  "details": {
+		    "subtotal": "7.41",
+		    "tax": "0.03",
+		    "shipping": "0.03"}},
+		"description": "This is the payment transaction description." }]})
+
+	payment.create()  # return True or False
+
+
+	if payment.create():
+		print("Payment created successfully")
+		return totalAmount
+	else:
+		print(payment.error)
+		pass
+
+#  payment = paypalrestsdk.Payment({
+#    "intent": "sale",
+#    "payer": {
+#      "payment_method": "credit_card",
+#      "funding_instruments": [{
+#        "credit_card": {
+#          "type": cardType,
+#          "number": cardNo,
+#          "expire_month": month,
+#          "expire_year": year,
+#          "cvv2": cvv2,
+#          "first_name": first,
+#          "last_name": last }}]},
+#    "transactions": [{
+#      "amount": {
+#        "total": totalAmount,
+#        "currency": "EUR" },
+#      "description": "This is the payment transaction description." }]})
+
+#  payment.create()  # return True or False
+
+#  if payment.create():
+#    print("Payment created successfully")
+#    return totalAmount
+#  else:
+#    print(payment.error)
+#    pass
+
+def Payout():
+	payout = Payout({
+		"sender_batch_header": {
+		    "sender_batch_id": "batch_1",
+		    "email_subject": "You have a payment"
+		},
+		"items": [
+		    {
+		        "recipient_type": "EMAIL",
+		        "amount": {
+		            "value": 0.99,
+		            "currency": "USD"
+		        },
+		        "receiver": "shirt-supplier-one@mail.com",
+		        "note": "Thank you.",
+		        "sender_item_id": "item_1"
+		    }
+		]
+	})
+
+	if payout.create(sync_mode=True):
+		print("payout[%s] created successfully" %
+		      (payout.batch_header.payout_batch_id))
+	else:
+		print(payout.error)
 
 def StoreACard(cardType,cardNo,month,year,first,last,userID):
   paypalrestsdk.configure({

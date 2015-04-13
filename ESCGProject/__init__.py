@@ -5,7 +5,7 @@ app = Flask(__name__)
 import ESCGProject.views
 from ESCGProject.database import db_session, init_db
 
-init_db()
+#init_db()
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
