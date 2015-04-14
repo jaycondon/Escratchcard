@@ -2,6 +2,13 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 from ESCGProject.models import *
 
+import pymysql
+
+import logging
+
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 import random
 
 TOP_PRIZE = 20
@@ -19,14 +26,23 @@ FIFTH_CHANCE = 14
 CREATE_CARD = 120
 MIN_CARD = 20
 
-engine = create_engine('mysql+pymysql://root:itcarlow@localhost/ESCGdb', convert_unicode=True, echo=False)
-#metadata = MetaData()
-#Base.metadata.create_all(engine)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=True,
-                                         bind=engine))
+def getconn():
+	user = input('What is the  user name for the database?')
+	password = input('What is the password for your database?')
+	host = input('What is the host for your database?')
+	database = input('What is the database name?')
+	c = pymysql.connect(host=host, user=user, passwd=password, db=database)
+    # do things with 'c' to set up
+	return c
+
+#engine = create_engine('mysql+pymysql://root:itcarlow@localhost/ESCGdb', convert_unicode=True, echo=False)7
+engine = create_engine('mysql+pymysql://', creator=getconn, convert_unicode=True, echo=False)
+db_session = scoped_session(sessionmaker(autocommit=False,autoflush=True,bind=engine))
+print("database")
+print(engine)
+
 def init_db():
-    Base.metadata.create_all(bind=engine)
+	Base.metadata.create_all(bind=engine)
 
 def CheckUser(name, password):
 	return db_session.query(User).filter(User.name==name).filter(User.password==password).first()

@@ -1,6 +1,6 @@
 from ESCGProject import app
 
-from ESCGProject.database import db_session, init_db
+#from ESCGProject.database import db_session, init_db
 from ESCGProject.models import Card, Card_Detail, User
 
 import random

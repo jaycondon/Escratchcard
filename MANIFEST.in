@@ -1,0 +1,2 @@
+recursive-include ESCGProject/templates *
+recursive-include ESCGProject/static *
