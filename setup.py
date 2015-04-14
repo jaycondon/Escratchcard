@@ -9,7 +9,8 @@ setup(
     zip_safe=False,
     install_requires=[
     'Flask>=0.10',
-    'SQLAlchemy>=1.0',
-    'WTF>=.11'
+    'PyMySQL>=0.6',
+    'Flask-WTF>=0.11',
+    'paypalrestsdk>=1.1.0'
 	]
 )

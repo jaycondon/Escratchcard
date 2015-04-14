@@ -4,10 +4,10 @@ from ESCGProject.models import *
 
 import pymysql
 
-import logging
+# import logging
 
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+# logging.basicConfig()
+# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 import random
 
