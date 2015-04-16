@@ -1,4 +1,6 @@
 from ESCGProject import app
+from Crypto.Cipher import AES
+from Crypto import Random
 
 #from ESCGProject.database import db_session, init_db
 from ESCGProject.models import Card, Card_Detail, User
@@ -6,6 +8,26 @@ from ESCGProject.models import Card, Card_Detail, User
 import random
 
 import os
+def pad(s):
+	return s + ((16-len(s) % 16) * '{')
+
+def encrypt(card_id):
+	plaintext = str(card_id)
+	# if len(plaintext) <  16:
+	# 	plaintext = pad(plaintext)
+	plaintext = pad(plaintext)
+	encryptobj = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
+	ciphertext = encryptobj.encrypt(plaintext)
+	print(type(ciphertext))
+	print(list(ciphertext))
+	return list(ciphertext)
+
+def decrypt(ciphertext):
+	decryptobj = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
+	plaintext = decryptobj.decrypt(ciphertext).decode('utf-8')
+	l = plaintext.count('{')
+	return plaintext[:len(plaintext)-l]
+
 
 def getImages(isWinner,no_of_cards):
 	imagelist = []

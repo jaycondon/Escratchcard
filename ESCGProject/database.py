@@ -27,10 +27,14 @@ CREATE_CARD = 120
 MIN_CARD = 20
 
 def getconn():
-	user = input('What is the  user name for the database?')
-	password = input('What is the password for your database?')
-	host = input('What is the host for your database?')
-	database = input('What is the database name?')
+	# user = input('What is the  user name for the database?')
+	# password = input('What is the password for your database?')
+	# host = input('What is the host for your database?')
+	# database = input('What is the database name?')
+	user = "root"
+	password = "itcarlow"
+	host = "localhost"
+	database = "ESCGdb"
 	c = pymysql.connect(host=host, user=user, passwd=password, db=database)
     # do things with 'c' to set up
 	return c

@@ -1,21 +1,30 @@
-<!doctype html>
-<title>Electronic Scratch Card Game</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<div class=page>
-	<h1>Electronic Scratch Card Game</h1>
-	<div class=metanav>
-		<a href={{url_for('main')}}>Main</a>
-		<a href='info'>How To Play</a>
-		<a href={{ url_for('DepositMoney') }}>Deposit Money</a>
-		<a href={{ url_for('withdraw') }}>Withdraw Money</a>
+{% extends "bootstrap/base.html" %}
+{% block title %}Electronic Scratch Card Game{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-default">
+	<ul class="nav nav-tabs">
+		<li role="presentation"  class="active"><a href='info'>ESCG</a></li>
+		<li role="presentation"><a href={{url_for('main')}}>Play Game</a></li>
+		<li role="presentation"><a href={{ url_for('DepositMoney') }}>Deposit Money</a></li>
+		<li role="presentation"><a href={{ url_for('withdraw') }}>Withdraw Money</a></li>
 		{% if not 'username' in session %}
-			<a href="{{ url_for('login') }}">log in</a>
+		<li role="presentation"><a href="{{ url_for('login') }}">Log In</a></li>
 		{% else %}
-			<a href="{{ url_for('logout') }}">log out</a>
+		<li role="presentation"><a href="{{ url_for('logout') }}">Log Out</a></li>
 		{% endif %}
-	</div>
-	{% for message in get_flashed_messages() %}
-	<div class=flash>{{ message }}</div>
-	{% endfor %}
-	{% block body %}{% endblock %}
-</div>
+	</ul>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+{% endblock %}
+{% block scripts %}
+if ($(window).width() > 400) {
+   alert('Less than 960');
+}
+else {
+   alert('More than 960');
+}
+{% endblock %}

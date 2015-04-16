@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
-{% block body %}
+
+{% block content %}
+
 <h2>Main</h2>
 {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 <table>
@@ -9,30 +11,32 @@
 <canvas id="myCanvas"></canvas> 
 <form action="/buyCard">
 <input type="submit" value="Buy Card">
-<button type="button" name="myButton" onclick="draw_graphics(true);checkwin({{card_id}})">Scratch Off</button>
+<button type="button" name="myButton" onclick="draw_graphics(true);checkwin()">Scratch Off</button>
 </form>
-<!--  <ul>
-	http://stackoverflow.com/questions/13071275/flask-jinja-macros-variable-in-url-for
-	<li>list</li>
-	{% for image in imagelist %}
-	<li id="eachimage">{{ url_for('static', filename = 'images/%s' % image)}}
-	<img src="{{ url_for('static', filename='images/%s' % image) }}" alt="{{image}}" >
-	{% endfor %}
-</ul>  -->
-
 <script type="text/javascript">
 var loaded = false;
 
 window.onload = function() {
-  draw_graphics(false);
-  document.getElementById("demo").innerHTML =  "{{card_id}}";
+	draw_graphics(false);
+	var canvas = document.querySelector('myCanvas');
+	fitToContainer(canvas);
+
+	function fitToContainer(canvas) {
+		// Make it visually fill the positioned parent
+		canvas.style.width ='100%';
+		canvas.style.height='100%';
+		// ...then set the internal size to match
+		canvas.width  = canvas.offsetWidth;
+		canvas.height = canvas.offsetHeight;
+	}
 };
 
-function checkwin(card) 
+function checkwin() 
 {
 	if(loaded) return;
 
 	var xmlhttp = new XMLHttpRequest();
+	var car = "{{card_id}}"
 	xmlhttp.onreadystatechange = function() 
 	{
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) 

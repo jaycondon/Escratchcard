@@ -1,18 +1,12 @@
 {% extends "layout.html" %}
-{% block body %}
-{% from "_formhelpers.html" import render_field %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block content %}
+{{util.flashed_messages()}}
 <h2>Deposit</h2>
-<form method=post action="/Deposit">
-  <dl>
-    {{ render_field(form.card_type) }}
-    {{ render_field(form.number) }}
-    {{ render_field(form.month) }}
-    {{ render_field(form.year) }}
-    {{ render_field(form.cvv2) }}
-    {{ render_field(form.firstname) }}
-    {{ render_field(form.lastname) }}
-    {{ render_field(form.totalAmount) }}
-  </dl>
-  <p><input type=submit value=Deposit>
-</form>
+{{ wtf.quick_form(form, action="/Deposit", method="post", extra_classes=None, role="form", id="myForm", form_type="horizontal", horizontal_columns=('lg', 2, 10), enctype=None, button_map={'submit_button': 'primary'}) }}
+
 {% endblock %}
+<!--$("#formButton").on("click", function(){$("#myForm").submit()});-->

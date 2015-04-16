@@ -1,0 +1,21 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Electronic Scratch Card Game{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-default">
+	<ul class="nav nav-tabs">
+		<li role="presentation" class="active"><a href={{url_for('main')}}>Main</a></li>
+		<li role="presentation"><a href={{ url_for('DepositMoney') }}>Deposit Money</a></li>
+		<li role="presentation"><a href={{ url_for('withdraw') }}>Withdraw Money</a></li>
+		{% if not 'username' in session %}
+		<li role="presentation"><a href="{{ url_for('login') }}">Log In</a></li>
+		{% else %}
+		<li role="presentation"><a href="{{ url_for('logout') }}">Log Out</a></li>
+		{% endif %}
+	</ul>
+</nav>
+{% endblock %}
+
+{% block content %}
+  <h1>Hello, Bootstrap</h1>
+{% endblock %}
