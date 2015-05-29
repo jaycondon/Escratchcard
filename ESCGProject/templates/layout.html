@@ -1,4 +1,5 @@
 {% extends "bootstrap/base.html" %}
+{% import "bootstrap/utils.html" as util %}
 {% block title %}Electronic Scratch Card Game{% endblock %}
 
 {% block navbar %}
@@ -18,13 +19,5 @@
 {% endblock %}
 
 {% block content %}
-
-{% endblock %}
-{% block scripts %}
-if ($(window).width() > 400) {
-   alert('Less than 960');
-}
-else {
-   alert('More than 960');
-}
+{{util.flashed_messages()}}
 {% endblock %}

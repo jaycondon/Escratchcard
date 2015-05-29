@@ -14,5 +14,6 @@ context.load_cert_chain('ESCGProject/cacert.pem', 'ESCGProject/privkey.pem')
 
 init_db()
 
-app.run(debug=True, ssl_context=context)
-#app.run(host='0.0.0.0', ssl_context=context)
+#app.debug=True
+#app.run()
+app.run(host='127.0.0.1', ssl_context=context)

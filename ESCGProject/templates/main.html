@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
+{% import "bootstrap/utils.html" as util %}
 
 {% block content %}
-
+{{util.flashed_messages()}}
 <h2>Main</h2>
 {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 <table>
@@ -13,22 +14,15 @@
 <input type="submit" value="Buy Card">
 <button type="button" name="myButton" onclick="draw_graphics(true);checkwin()">Scratch Off</button>
 </form>
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 <script type="text/javascript">
 var loaded = false;
 
 window.onload = function() {
 	draw_graphics(false);
 	var canvas = document.querySelector('myCanvas');
-	fitToContainer(canvas);
 
-	function fitToContainer(canvas) {
-		// Make it visually fill the positioned parent
-		canvas.style.width ='100%';
-		canvas.style.height='100%';
-		// ...then set the internal size to match
-		canvas.width  = canvas.offsetWidth;
-		canvas.height = canvas.offsetHeight;
-	}
 };
 
 function checkwin() 

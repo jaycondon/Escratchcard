@@ -16,25 +16,21 @@ import random
 import os
 import array
 
+@app.route('/', methods=['GET', 'POST'])
+def empty():
+	if 'username' in session:
+		return render_template('info.html')
+	return redirect(url_for('login'))
+
 @app.route('/CheckWinServer', methods=['GET', 'POST'])
 def CheckWinServer():
 	thecard = request.form['card_id']
+	# Taken from https://www.youtube.com/watch?v=lsflaKpeB7Q
 	inlist = [int(s) for s in thecard[1:-1].split(',')]
 	decypted_card_id = decrypt(array.array('B', inlist).tostring())
 	current_user = database.CheckCard(int(decypted_card_id),session['username'])
 	balance = current_user.balance
 	return str(balance)
-
-@app.route('/', methods=['GET', 'POST'])
-def unused():
-	return redirect(url_for('main'))
-
-@app.route('/details', methods=['GET', 'POST'])
-def details():
-	if 'username' in session:
-		return "Details"
-	else:
-		return redirect(url_for('main'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,7 +49,6 @@ def login():
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
 	form = LoginForm(request.form)
-	print("logout")
 	session.pop('username', None)
 	return render_template('login.html',form=form)
 
@@ -63,7 +58,6 @@ def main():
 		current_user = database.GetUser(session['username'])
 		overlay_img=url_for('static', filename='overlay.jpg')
 		return render_template('main.html',balance=current_user.balance,overlay_img=overlay_img)
-#		return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg")
 	return redirect(url_for('login'))
 
 
@@ -75,7 +69,8 @@ def register():
 		if user is None:
 			database.AddUser(form.username.data,form.email.data,form.password.data)
 			flash('Thanks for registering')
-			return redirect(url_for('login'))
+			session['username'] = form.username.data
+			return render_template('info.html')
 		flash('Username already exists')
 		return render_template('register.html', form=form)
 	return render_template('register.html', form=form)
@@ -86,7 +81,8 @@ def buyCard():
 	if 'username' in session:
 		current_user = database.GetUser(session['username'])
 		if current_user.balance < 1:
-			return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg",error="You do not have enough funds")
+			flash('You do not have enough funds')
+			return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg")
 		else:
 			current_user.balance = current_user.balance - 1
 			a_card = database.RetrieveCard()
@@ -97,7 +93,6 @@ def buyCard():
 				amount = random.choice([1,2,5,10,20])
 				image_list = getImages(False,6)
 			else:
-#				current_user.balance = current_user.balance + a_card.value
 				db_session.commit()
 				image_list = getImages(True,6)
 				amount = a_card.value
@@ -117,7 +112,8 @@ def DepositMoney():
 				db_session.commit()
 				return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg")
 			else:
-				return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg",error="Payment unsuccessful")
+				flash("Payment unsuccessful")
+				return render_template('main.html',balance=current_user.balance,overlay_img="./static/overlay.jpg")
 		return render_template('deposit.html',form=form)
 	return redirect(url_for('login'))
 
@@ -128,31 +124,17 @@ def withdraw():
 		current_user = database.GetUser(session['username'])
 		if request.method == 'POST'  and form.validate():
 			if int(form.totalAmount.data) > current_user.balance:
-				return render_template('withdraw.html',balance=current_user.balance,form=form,error="You have insufficient funds")
-			print(session['username'])
-			print(current_user.email)
+				flash("You do not have enough funds")
+				return render_template('withdraw.html',balance=current_user.balance,form=form)
 			payout_result = PayOut(current_user.email,form.totalAmount.data)
 			print(payout_result)
 			if payout_result == "SUCCESS":
 				current_user.balance = current_user.balance - int(form.totalAmount.data)
 				db_session.commit()
 			else:
-				return render_template('withdraw.html',balance=current_user.balance,form=form,error="There has been a problem in the payout process")
+				flash("There has been a problem in the payout process. Please try again")
+				return render_template('withdraw.html',balance=current_user.balance,form=form)
 		return render_template('withdraw.html',balance=current_user.balance,form=form)
-	return redirect(url_for('main'))
-
-@app.route('/AddCard', methods=['GET', 'POST'])
-def AddCard():
-	if 'username' in session:
-		form = AddCardForm(request.form)
-		if request.method == 'POST':
-			current_user = db_session.query(User).filter(User.name==session['username']).first()
-			StoreACard(form.card_type.data,form.number.data,form.month.data,form.year.data,form.cvv2.data,form.firstname.data,form.lastname.data,current_user.id)	
-		return render_template('addcard.html',form=form)
-	return redirect(url_for('login'))
-
-@app.route('/*', methods=['GET', 'POST'])
-def WrongUrl():
 	return redirect(url_for('main'))
 
 @app.route('/info', methods=['GET', 'POST'])

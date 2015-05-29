@@ -73,11 +73,7 @@ class PaymentForm(Form):
     lastname = StringField('Last Name',[validators.Required()])
                                                                                         #taken from http://regexlib.com/
     totalAmount = StringField('Deposit Amount',[validators.Required(), validators.Regexp("^\$?([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?$", flags=0, message="That is not a valid currency. Try. 1234.12")])
- #   totalAmount = IntegerField('Total Amount',[validators.Required()])
     submit_button = SubmitField('Deposit')
-
-#,validators.Regexp("([0-9]{2})", flags=0, message="That is not the correct format for Month. Try (MM)")
-
 
 class WithdrawForm(Form):
     hidden_tag = HiddenField()

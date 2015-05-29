@@ -1,12 +1,10 @@
 {% extends "layout.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "bootstrap/fixes.html" as fixes %}
-{% import "bootstrap/utils.html" as util %}
 
 {% block content %}
-{{util.flashed_messages()}}
 <h2>Deposit</h2>
 {{ wtf.quick_form(form, action="/Deposit", method="post", extra_classes=None, role="form", id="myForm", form_type="horizontal", horizontal_columns=('lg', 2, 10), enctype=None, button_map={'submit_button': 'primary'}) }}
 
 {% endblock %}
-<!--$("#formButton").on("click", function(){$("#myForm").submit()});-->
+

@@ -9,19 +9,20 @@ import random
 
 import os
 def pad(s):
+	# Taken from https://www.youtube.com/watch?v=lsflaKpeB7Q
 	return s + ((16-len(s) % 16) * '{')
 
+# Taken from https://www.youtube.com/watch?v=lsflaKpeB7Q
 def encrypt(card_id):
 	plaintext = str(card_id)
-	# if len(plaintext) <  16:
-	# 	plaintext = pad(plaintext)
+	if not len(plaintext) %  16:
+		plaintext = pad(plaintext)
 	plaintext = pad(plaintext)
 	encryptobj = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
 	ciphertext = encryptobj.encrypt(plaintext)
-	print(type(ciphertext))
-	print(list(ciphertext))
 	return list(ciphertext)
 
+# Taken from https://www.youtube.com/watch?v=lsflaKpeB7Q
 def decrypt(ciphertext):
 	decryptobj = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
 	plaintext = decryptobj.decrypt(ciphertext).decode('utf-8')
@@ -34,7 +35,6 @@ def getImages(isWinner,no_of_cards):
 	finallist = []
 	for f in os.listdir("ESCGProject/static/images"):
 		imagelist.append(f)
-		print(f)
 	i = 0
 	if isWinner==False:
 		while(i < no_of_cards):
@@ -44,7 +44,6 @@ def getImages(isWinner,no_of_cards):
 			else:
 				finallist.append(image)
 				i = i + 1
-		print(finallist)
 		return finallist
 	else:
 		win_image = imagelist[random.randrange(0, len(imagelist), 1)]
@@ -61,5 +60,4 @@ def getImages(isWinner,no_of_cards):
 					finallist.append(image)
 					i = i + 1
 		random.shuffle(finallist)
-		print(finallist)
 		return finallist

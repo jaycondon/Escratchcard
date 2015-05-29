@@ -4,12 +4,9 @@ from ESCGProject.models import *
 
 import pymysql
 
-# import logging
-
-# logging.basicConfig()
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
 import random
+
+import getpass
 
 TOP_PRIZE = 20
 SECOND_PRIZE = 10
@@ -27,23 +24,21 @@ CREATE_CARD = 120
 MIN_CARD = 20
 
 def getconn():
+
 	# user = input('What is the  user name for the database?')
-	# password = input('What is the password for your database?')
+	# password = getpass.getpass('What is the password for your database?')
 	# host = input('What is the host for your database?')
 	# database = input('What is the database name?')
 	user = "root"
 	password = "itcarlow"
 	host = "localhost"
-	database = "ESCGdb"
+	database = "ESCGdb" 
 	c = pymysql.connect(host=host, user=user, passwd=password, db=database)
     # do things with 'c' to set up
 	return c
 
-#engine = create_engine('mysql+pymysql://root:itcarlow@localhost/ESCGdb', convert_unicode=True, echo=False)7
 engine = create_engine('mysql+pymysql://', creator=getconn, convert_unicode=True, echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=True,bind=engine))
-print("database")
-print(engine)
 
 def init_db():
 	Base.metadata.create_all(bind=engine)
@@ -66,8 +61,6 @@ def AddUser(name,email,password):
 def CheckCard(card_id,session_user):
 	theCard = db_session.query(Card.id, Card_Detail.value).join(Card_Detail, Card.id==Card_Detail.card_id).filter(Card.id==card_id).first()
 	theUser = GetUser(session_user)
-	print("inside CheckCard")
-	print(theCard)
 	if theCard.value > 0:
 		winnings = theCard.value
 		theUser.balance = theUser.balance + winnings
@@ -101,12 +94,7 @@ def FillCards(chance,prize):
 		db_session.commit()
 		FillCards(chance, prize)
 
-def MoreCards():
-#	init_db()
-	print("print inside buy card")
-#	if len(db_session.query(Card).all()) < MIN_CARD:
-#		print("print Less than 20")
-	
+def MoreCards():	
 	i = 0
 	last_card = db_session.query(Card).first()
 	print(last_card)

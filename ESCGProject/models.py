@@ -15,16 +15,6 @@ class User(Base):
     balance = Column(Integer)
 
     users_cards = relationship("Card")
-    credit_cards = relationship("CreditCard")
-#insert into user (id,name,email,password,balance) Values (120, 'Johnny', 'johnnycndn@yahoo.ie', 'password', 0);
-
-class CreditCard(Base):
-    __tablename__ = 'credit_card'
-
-    id = Column(Integer, primary_key=True)
-    usersCC = relationship("User")
-    user_id = Column(ForeignKey('user.id'))
-
 
 class Card(Base):
     __tablename__ = 'card'
