@@ -5,7 +5,7 @@ from ESCGProject.models import *
 #import pymysql			This had to be changed for Heroku
 
 import postgresql
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import random
 
