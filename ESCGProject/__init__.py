@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 Bootstrap(app)
+app.secret_key = 'some_secret'
 
 import ESCGProject.views
 from ESCGProject.database import db_session
