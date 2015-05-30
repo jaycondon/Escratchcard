@@ -16,4 +16,4 @@ init_db()
 
 #app.debug=True
 #app.run()
-app.run(ssl_context=context)#host='127.0.0.1', 
+app.run(host='0.0.0.0',ssl_context=context)#host='127.0.0.1', 
