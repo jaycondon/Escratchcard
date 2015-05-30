@@ -1,1 +1,1 @@
-web: gunicorn ESCGProject:app --log-file -
+gunicorn ESCGProject:app --log-file -
