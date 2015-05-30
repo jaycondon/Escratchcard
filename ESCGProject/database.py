@@ -4,7 +4,7 @@ from ESCGProject.models import *
 
 #import pymysql			This had to be changed for Heroku
 
-import py-postgresql
+import postgresql
 import urlparse
 
 import random
@@ -62,7 +62,7 @@ def getconn():
 	host = url.hostname
 	database = url.path[1:]
 	port=url.port
-	c = py-postgresql.connect(host=host, user=user, passwd=password, db=database, port=port)
+	c = postgresql.connect(host=host, user=user, passwd=password, db=database, port=port)
     # do things with 'c' to set up
 	return c
 
