@@ -1,1 +1,1 @@
-gunicorn ESCGProject:app --log-file -
+gunicorn runserver:app --log-file -
