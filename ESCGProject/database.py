@@ -4,11 +4,11 @@ from ESCGProject.models import *
 
 #import pymysql			This had to be changed for Heroku
 
-import postgresql
+import psycopg2
 from urllib.parse import urlparse
 
 import random
-
+import os
 import getpass
 
 TOP_PRIZE = 20
@@ -48,8 +48,8 @@ def getconn():
 	# password = getpass.getpass('What is the password for your database?')
 	# host = input('What is the host for your database?')
 	# database = input('What is the database name?')
-	urlparse.uses_netloc.append("postgres")
-	url = urlparse.urlparse(os.environ["DATABASE_URL"])
+#	urlparse.uses_netloc.append("postgres")
+	url = urlparse(os.environ["DATABASE_URL"])
 
 #	conn = psycopg2.connect(
  #   database=url.path[1:],
@@ -62,12 +62,12 @@ def getconn():
 	host = url.hostname
 	database = url.path[1:]
 	port=url.port
-	c = postgresql.connect(host=host, user=user, passwd=password, db=database, port=port)
+	c = psycopg2.connect(host=host, user=user, passwd=password, db=database, port=port)
     # do things with 'c' to set up
 	return c
 
 #engine = create_engine('mysql+pymysql://', creator=getconn, convert_unicode=True, echo=False)
-engine = create_engine('postgresql+pypostgresql://', creator=getconn, convert_unicode=True, echo=False)
+engine = create_engine('postgresql+psycopg2://', creator=getconn, convert_unicode=True, echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=True,bind=engine))
 
 def init_db():
