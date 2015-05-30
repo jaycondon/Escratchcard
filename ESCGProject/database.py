@@ -62,7 +62,7 @@ def getconn():
 	host = url.hostname
 	database = url.path[1:]
 	port=url.port
-	c = psycopg2.connect(host=host, user=user, passwd=password, db=database, port=port)
+	c = psycopg2.connect(host=host, user=user, password=password, database=database, port=port)
     # do things with 'c' to set up
 	return c
 
