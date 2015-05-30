@@ -1,6 +1,7 @@
 import logging
 
 from ESCGProject import app, database, paypal
+#from ESCGProject import app, paypal
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from ESCGProject.forms import RegistrationForm, LoginForm, PaymentForm, WithdrawForm
 from ESCGProject.utils import getImages, encrypt, decrypt
