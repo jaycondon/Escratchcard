@@ -1,1 +1,1 @@
-web: gunicorn runserver:application
+web: gunicorn ESCGProject:app
