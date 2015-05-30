@@ -1,0 +1,12 @@
+{% extends "LoginRegLayout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+
+{% block title %}Electronic Scratch Card Game{% endblock %}
+
+{% block content %}
+{{util.flashed_messages()}}
+{{ wtf.quick_form(form, action="/login", method="post", extra_classes=None, role="form", id="myForm", form_type="horizontal", horizontal_columns=('lg', 2, 10), enctype=None, button_map={'submit_button': 'primary'}) }}
+{% endblock %}

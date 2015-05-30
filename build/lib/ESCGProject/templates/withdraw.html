@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block content %}
+{{util.flashed_messages()}}
+<h2>Withdraw</h2>
+Account Balance:<input type="text" name="balance" value="{{ balance }}" id="balance" readonly>
+{{ wtf.quick_form(form, form_type='horizontal', button_map={'submit_button': 'primary'})}}
+{% endblock %}
