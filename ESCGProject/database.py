@@ -2,7 +2,10 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 from ESCGProject.models import *
 
-import pymysql
+#import pymysql			This had to be changed for Heroku
+
+import py-postgresql
+import urlparse
 
 import random
 
@@ -23,21 +26,48 @@ FIFTH_CHANCE = 14
 CREATE_CARD = 120
 MIN_CARD = 20
 
+
+# this whole function was for mysql. Switched to postgresql for Heroku
+# def getconn():
+
+# 	# user = input('What is the  user name for the database?')
+# 	# password = getpass.getpass('What is the password for your database?')
+# 	# host = input('What is the host for your database?')
+# 	# database = input('What is the database name?')
+# 	user = "root"
+# 	password = "itcarlow"
+# 	host = "localhost"
+# 	database = "ESCGdb" 
+# 	c = pymysql.connect(host=host, user=user, passwd=password, db=database)
+#     # do things with 'c' to set up
+# 	return c
+
 def getconn():
 
 	# user = input('What is the  user name for the database?')
 	# password = getpass.getpass('What is the password for your database?')
 	# host = input('What is the host for your database?')
 	# database = input('What is the database name?')
-	user = "root"
-	password = "itcarlow"
-	host = "localhost"
-	database = "ESCGdb" 
-	c = pymysql.connect(host=host, user=user, passwd=password, db=database)
+	urlparse.uses_netloc.append("postgres")
+	url = urlparse.urlparse(os.environ["DATABASE_URL"])
+
+#	conn = psycopg2.connect(
+ #   database=url.path[1:],
+    #user=url.username,
+   # password=url.password,
+  #  host=url.hostname,
+ #   port=url.port
+	user = url.username
+	password = url.password
+	host = url.hostname
+	database = url.path[1:]
+	port=url.port
+	c = py-postgresql.connect(host=host, user=user, passwd=password, db=database, port=port)
     # do things with 'c' to set up
 	return c
 
-engine = create_engine('mysql+pymysql://', creator=getconn, convert_unicode=True, echo=False)
+#engine = create_engine('mysql+pymysql://', creator=getconn, convert_unicode=True, echo=False)
+engine = create_engine('postgresql+pypostgresql://', creator=getconn, convert_unicode=True, echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=True,bind=engine))
 
 def init_db():
